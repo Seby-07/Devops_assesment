@@ -1,0 +1,41 @@
+pipeline {
+    agent any
+
+    stages {
+        stage('Checkout') {
+            steps {
+                git 'https://github.com/your-repo/your-app.git'
+            }
+        }
+
+        stage('Build') {
+            steps {
+                sh './build.sh'
+            }
+        }
+
+        stage('Test') {
+            steps {
+                sh './test.sh'
+            }
+        }
+
+        stage('Deploy') {
+            steps {
+                sshagent(['your-ssh-key-id']) {
+                    sh '''
+                    scp -o StrictHostKeyChecking=no -i /path/to/key.pem ./your-app.zip ec2-user@your-instance-ip:/var/www/html/
+                    ssh -o StrictHostKeyChecking=no -i /path/to/key.pem ec2-user@your-instance-ip 'unzip /var/www/html/your-app.zip -d /var/www/html/'
+                    '''
+                }
+            }
+        }
+    }
+
+    post {
+        always {
+            archiveArtifacts artifacts: '*/target/.jar', allowEmptyArchive: true
+            junit 'target/test-*.xml'
+        }
+    }
+}
