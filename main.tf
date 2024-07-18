@@ -89,7 +89,7 @@ resource "aws_instance" "web" {
   }
 }
 
-# Cloudwsatch Creation
+# CloudWatch Alarm for High CPU Usage
 resource "aws_cloudwatch_metric_alarm" "high_cpu" {
   alarm_name          = "high_cpu"
   comparison_operator = "GreaterThanThreshold"
